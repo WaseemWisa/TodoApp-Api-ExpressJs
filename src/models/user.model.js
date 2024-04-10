@@ -12,7 +12,11 @@ const UserSchema = new Schema({
   },
   password: {
     type: String,
-  }
+  },
+  tasks: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Task'
+  }],
 }) 
 
 

@@ -1,6 +1,8 @@
 const tokenModel = require("../models/token.model");
 const jwt = require("jsonwebtoken");
 const { generateAccessToken , generateRefreshToken } = require("../utils/generateTokens");
+
+
 const refreshToken = async (req , res) => {
   const {token} = req.body;
   const oldRefreshToken = await tokenModel.findOne({refreshToken: token});
@@ -24,9 +26,30 @@ const refreshToken = async (req , res) => {
       }
     })
   }
-
 }
 
+const verify = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = await jwt.verify(token, process.env.JWT_ACCESS_KEY);
+      req.user = decoded;
+      next();
+    } catch (err) {
+      res.status(401).json({ message: err });
+    }
+  } else {
+    res.status(403).json({ message: "Unauthorized" });
+  }
+};
+
+
+
+
+
 module.exports = {
-  refreshToken
+  refreshToken,
+  verify
 }

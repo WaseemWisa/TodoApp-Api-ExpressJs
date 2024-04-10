@@ -5,8 +5,8 @@ const userController = require("../controllers/user.controller");
 const  validateUser  = require("../utils/validationUser");
 const validateLogin = require('../utils/validationLogin');
 
-router.post("/add", validateUser , userController.addUser)
-router.post("/login", validateLogin , userController.login)
+router.post("/register", validateUser , userController.register)
+router.get("/login", validateLogin , userController.login)
 
 //
 

@@ -1,10 +1,11 @@
 const { validationResult } = require('express-validator');
-const UserModel = require("../models/user.model");
+const asyncHandler = require('express-async-handler');
 const { generateAccessToken , generateRefreshToken } = require("../utils/generateTokens");
+const UserModel = require("../models/user.model");
 const tokenModel = require('../models/token.model');
 
 
-const addUser = async (req , res) => {
+const register = async (req , res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() }); 
@@ -19,38 +20,45 @@ const addUser = async (req , res) => {
 }
 
 
-const login = async (req , res) => {
-  const {email , password} = req.body;
-  const errors = validationResult(req);
-  if(!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() }); 
-  } else {
-    try {
-      const userFound = await UserModel.find({email});
-      const user = userFound.filter((u) => u.email === email && u.password === password);
-      if (!user) {
-        return res.status(400).json({ msg: "User Not Found" }); 
-      } else {
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
-        await tokenModel.create({refreshToken: refreshToken});
-        return res.status(200).json({ msg: "User Found", data: {
-          user,
-          tokens: {
-            accessToken,
-            refreshToken,
-          }
-        }}); 
-      }
-    } catch (error) {
-      console.log(error);
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const user = await UserModel.findOne({ email, password }).populate("tasks");
+    console.log(user.tasks)
+    if (!user) {
+      return res.status(400).json({ msg: "User Not Found" });
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+    await tokenModel.create({ refreshToken });
+
+    return res.status(200).json({
+      msg: "User Found",
+      data: {
+        user,
+        tokens: {
+          accessToken,
+          refreshToken,
+        },
+      },
+    });
+  } catch (error) {
+    console.log("Error in login:", error);
+    res.status(500).json({ msg: "Internal server error" });
   }
-}
+};
+
+
 
 
 
 module.exports = {
-  addUser,
-  login
+  register,
+  login,
 }

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const Schema =  mongoose.Schema;
-
+const Schema = mongoose.Schema;
 
 const TaskSchema = new Schema({
   title: {
@@ -8,16 +7,13 @@ const TaskSchema = new Schema({
   },
   status: {
     type: Boolean,
-    default: false
+    default: false,
   },
   date: {
     type: String,
-    default: new Date().toLocaleDateString().toString()
+    default: new Date().toLocaleDateString().toString(),
   },
-  ownerId: {
-    type: String,
-  }
-}) 
-
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+});
 
 module.exports = mongoose.model("Task", TaskSchema);
