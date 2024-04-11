@@ -7,7 +7,12 @@ const asyncHandler = require('express-async-handler');
 const getAll = asyncHandler(async (req , res) => {
   const userId = req.user.payload._id;
   const tasks = await taskModel.find({owner: userId}).select("-__v");
-  res.status(200).json({msg: "User Data", data: tasks});
+    if (!tasks) {
+      return res.status(200).json({
+        msg: 'User Id Not Valid'
+    });
+  }
+  res.status(200).json({msg: "User Tasks", data: tasks});
 })
 
 
@@ -38,8 +43,13 @@ const upDateTask = asyncHandler(async (req, res) => {
 });
   
 const deleteTask = asyncHandler(async (req, res) => {
-    const tasks = await taskModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({ msg: "A Task Deleted Successfully", data: "" });
+  const tasks = await taskModel.findByIdAndDelete(req.params.id);
+  if(!tasks){ 
+    return res.status(200).json({
+        msg: 'No document found'
+    });
+  }
+  res.status(200).json({ msg: "A Task Deleted Successfully", data: "" });
 });
 
 module.exports = {

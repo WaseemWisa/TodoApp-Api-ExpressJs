@@ -13,10 +13,10 @@ const UserSchema = new Schema({
   password: {
     type: String,
   },
-  tasks: [{ 
+/*   tasks: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Task'
-  }],
+  }], */
 }) 
 
 
